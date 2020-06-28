@@ -200,7 +200,7 @@ def run_style_transfer(cnn, normalization_mean, normalization_std,
 
 def transfer_style(file_content, file_style, file_output):
     
-    imsize = 256  
+    imsize = 128  
 
     loader = transforms.Compose([
         transforms.Resize(imsize),  # нормируем размер изображения
