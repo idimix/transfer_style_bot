@@ -24,7 +24,7 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 dp.middleware.setup(LoggingMiddleware())
 
 
-@dp.message_handler(commands=['help'])
+@dp.message_handler(commands=['help'], state='*')
 async def process_help_command(message: types.Message):
     await message.reply("Привет!\nЧтобы перенести стиль введи команду /style_transfer и следуй инстуркциям")
 
