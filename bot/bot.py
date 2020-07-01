@@ -42,7 +42,7 @@ def transfer_style_send_photo(file_content, file_style, file_output, chat_id):
     # model start
     transfer_style(file_content, file_style, file_output)
 
-    with open(file_content, 'rb') as photo:
+    with open(file_output, 'rb') as photo:
         send_photo(chat_id, photo)
 
     shutil.rmtree(os.path.join(os.getcwd(), 'chat_id_%s' % chat_id))
