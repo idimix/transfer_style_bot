@@ -11,7 +11,7 @@ from collections import defaultdict
 import os
 import shutil
 
-from States import States
+from states import States
 from config import TOKEN
 from model import transfer_style
 
