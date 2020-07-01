@@ -198,10 +198,8 @@ def run_style_transfer(cnn, normalization_mean, normalization_std,
 
         return input_img
 
-def transfer_style(file_content, file_style, file_output):
+def transfer_style(file_content, file_style, file_output, imsize=256, num_steps=100):
     
-    imsize = 128  
-
     loader = transforms.Compose([
         transforms.Resize(imsize),  # нормируем размер изображения
         transforms.CenterCrop(imsize),
@@ -219,7 +217,7 @@ def transfer_style(file_content, file_style, file_output):
     # Определим предобученную модель
     cnn = models.vgg19(pretrained=True).features.to(device).eval()
     output = run_style_transfer(cnn, cnn_normalization_mean, cnn_normalization_std,
-                                content_img, style_img, content_img.clone(), num_steps=100)
+                                content_img, style_img, content_img.clone(), num_steps=num_steps)
 
     save_image(output, file_output)
 
