@@ -242,8 +242,8 @@ def transfer_style(file_content, file_style, file_output):
     style_model.load_state_dict(model_dict, False)
     
     # Load the images and preprocessing
-    content_image = tensor_load_rgbimage(file_content, size=512, keep_asp=True).unsqueeze(0)
-    style = tensor_load_rgbimage(file_style, size=512).unsqueeze(0)    
+    content_image = tensor_load_rgbimage(file_content, size=256, keep_asp=True).unsqueeze(0)
+    style = tensor_load_rgbimage(file_style, size=256).unsqueeze(0)    
     style = preprocess_batch(style)
 
     # Set the style target and generate outputs
