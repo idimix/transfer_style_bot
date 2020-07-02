@@ -13,8 +13,7 @@ import shutil
 
 from states import States
 from config import TOKEN
-from model import transfer_style
-
+from model_transfer_style import transfer_style
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
@@ -35,12 +34,12 @@ def send_photo(chat_id, photo):
     print(r.status_code)
 
 
-def transfer_style_send_photo(file_content, file_style, file_output, chat_id):
+def transfer_style_send_photo(file_content, file_style, file_output, num_steps, chat_id):
     # print('Start')
     # time.sleep(10)
     # print('Stop')
     # model start
-    transfer_style(file_content, file_style, file_output)
+    transfer_style(file_content, file_style, file_output, num_steps=num_steps)
 
     with open(file_output, 'rb') as photo:
         send_photo(chat_id, photo)
@@ -60,11 +59,11 @@ class MyThread(threading.Thread):
 def process_queue():
     while True:
         try:
-            file_content, file_style, file_output, message = queue_transfer_style.get(block=False)
+            file_content, file_style, file_output, num_steps, chat_id = queue_transfer_style.get(block=False)
         except queue.Empty:
             pass
         else:
-            transfer_style_send_photo(file_content, file_style, file_output, message)
+            transfer_style_send_photo(file_content, file_style, file_output, num_steps, chat_id)
 
         time.sleep(1)
 
@@ -79,11 +78,6 @@ async def process_help_command(msg: types.Message):
             'You can control me by sending these commands:\n'
             '/style_transfer - style transfer\n')
     await bot.send_message(msg.from_user.id, text)
-
-
-@dp.message_handler(commands=['help'], state='*')
-async def process_help_command(msg: types.Message):
-    await bot.send_message(msg.from_user.id, "/style_transfer - перенос стиля")
 
 
 @dp.message_handler(commands=["style_transfer"], state='*')
@@ -109,17 +103,32 @@ async def handle_get_original_photo(msg: types.Message):
 
 
 @dp.message_handler(content_types=['photo'], state=States.STATE_AWAIT_STYLE_IMAGE)
-async def handle_get_original_photo(msg: types.Message):
+async def handle_get_transfer_strength(msg: types.Message):
+    await States.STATE_AWAIT_TRANSFER_STRENGTH.set()
+    folder_name = 'chat_id_%s' % msg.from_user.id
+    await msg.photo[-1].download(os.path.join(os.getcwd(), folder_name, 'style.jpg'))
+    await bot.send_message(msg.from_user.id, "Set the style transfer strength as a integer from 1 to 5")
+
+
+@dp.message_handler(content_types=['text'], state=States.STATE_AWAIT_TRANSFER_STRENGTH)
+async def handle_get_style_photo(msg: types.Message):
+    if not msg.text in msg.text.strip() in list(map(str, range(1, 6))):
+        await bot.send_message(msg.from_user.id, "Input integer from 1 to 5, try again")
+        return
+
+    transfer_strength = int(msg.text)
+    num_steps = 100 * transfer_strength
+
     chat_id = msg.from_user.id
     folder_name = 'chat_id_%s' % chat_id
-    await msg.photo[-1].download(os.path.join(os.getcwd(), folder_name, 'style.jpg'))
-    await msg.reply("Style transfer in progress...")
+
+    await bot.send_message(chat_id, "Style transfer in progress...")
     file_content = os.path.join(os.getcwd(), folder_name, 'original.jpg')
     file_style = os.path.join(os.getcwd(), folder_name, 'style.jpg')
     file_output = os.path.join(os.getcwd(), folder_name, 'result.jpg')
 
     # adding a style transfer job to the queue
-    queue_transfer_style.put((file_content, file_style, file_output, chat_id))
+    queue_transfer_style.put((file_content, file_style, file_output, num_steps, chat_id))
     calculations[chat_id] = True
 
 
