@@ -1,6 +1,6 @@
 # transfer style bot
 
-This repository contains the source code of the bot, which transfers the style from one image to another. To transfer the style, two neural networks are used:
+This repository contains the source code of the Telegram bot, which transfers the style from one image to another. To transfer the style, two neural networks are used:
 
 * [A Neural Algorithm of Artistic Style](https://arxiv.org/abs/1508.06576). Implementation - Deep Learning School course materials
 
