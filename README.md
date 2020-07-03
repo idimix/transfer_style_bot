@@ -28,7 +28,7 @@ To start the transfer of the style, you need:
 
 ## Example
 
-![image-20200703211316756](images\example.png)
+<img src="https://github.com/Ivashnikov/transfer_style_bot/tree/master/images/example.jpg"></img>
 
 
 
