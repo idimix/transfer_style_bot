@@ -28,7 +28,7 @@ To start the transfer of the style, you need:
 
 ## Example
 
-<img src="https://github.com/Ivashnikov/transfer_style_bot/tree/master/images/example.jpg"></img>
+<img src="https://github.com/Ivashnikov/transfer_style_bot/tree/master/images/example.png"></img>
 
 
 
