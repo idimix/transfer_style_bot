@@ -28,7 +28,7 @@ To start the transfer of the style, you need:
 
 ## Example
 
-![image-20200703211316756](E:\Ivashnikov\AWS\transfer_style_bot\images\example.png)
+![image-20200703211316756](images\example.png)
 
 
 
