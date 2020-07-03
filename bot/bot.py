@@ -3,6 +3,7 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
+from aiogram.dispatcher import FSMContext
 import time
 import threading
 import queue
@@ -32,12 +33,19 @@ def send_photo(chat_id, photo):
     files = {'photo': photo}
     data = {'chat_id': chat_id}
     r = requests.post(url, files=files, data=data)
-    print(r.status_code)
+    # print(r.status_code)
+
+
+def send_message(chat_id, text):
+    url = "https://api.telegram.org/bot{token}/sendMessage".format(token=TOKEN)
+    data = {'chat_id': chat_id, 'text': text}
+    r = requests.post(url, data=data)
+    # print(r.status_code)
 
 
 def transfer_style_send_photo(model_name, file_content, file_style, file_output, chat_id):
     # print('Start')
-    # time.sleep(60)
+    # time.sleep(10)
     # print('Stop')
     # model start
     if model_name == '/gatys':
@@ -47,9 +55,11 @@ def transfer_style_send_photo(model_name, file_content, file_style, file_output,
     else:
         print('Error! Model name wrong')
 
-    if os.path.exists(file_output):
-        with open(file_output, 'rb') as photo:
+    if os.path.exists(file_content):
+        with open(file_content, 'rb') as photo:
             send_photo(chat_id, photo)
+
+    send_message(chat_id, 'Try again? Send the command /style_transfer')
 
     folder_name = os.path.join(os.getcwd(), 'chat_id_%s' % chat_id)
     if os.path.exists(folder_name):
@@ -143,23 +153,26 @@ async def handle_get_transfer_strength(msg: types.Message):
 
 
 @dp.message_handler(commands=['gatys', 'msg'], state=States.STATE_AWAIT_STYLE_METHOD)
-async def handle_get_style_photo(msg: types.Message):
+async def handle_get_style_photo(msg: types.Message, state: FSMContext):
     chat_id = msg.from_user.id
     folder_name = 'chat_id_%s' % chat_id
 
-    if calculations[chat_id]:
-        await bot.send_message(chat_id, "Wait for the end")
-    else:
-        await bot.send_message(chat_id, "Style transfer in progress...")
-        file_content = os.path.join(os.getcwd(), folder_name, 'original.jpg')
-        file_style = os.path.join(os.getcwd(), folder_name, 'style.jpg')
-        file_output = os.path.join(os.getcwd(), folder_name, 'result.jpg')
+    await bot.send_message(chat_id, "Style transfer in progress...")
+    file_content = os.path.join(os.getcwd(), folder_name, 'original.jpg')
+    file_style = os.path.join(os.getcwd(), folder_name, 'style.jpg')
+    file_output = os.path.join(os.getcwd(), folder_name, 'result.jpg')
 
-        # adding a style transfer job to the queue
-        model_name = msg.get_command().lower()
-        queue_transfer_style.put((model_name, file_content, file_style, file_output, chat_id))
-        calculations[chat_id] = True
+    # adding a style transfer job to the queue
+    model_name = msg.get_command().lower()
+    queue_transfer_style.put((model_name, file_content, file_style, file_output, chat_id))
+    calculations[chat_id] = True
 
+    await state.finish()
+
+
+@dp.message_handler(state='*')
+async def process_help_command(msg: types.Message):
+    await bot.send_message(msg.from_user.id, 'Follow the instructions above. If you don’t know what to do send a command /help')
 
 if __name__ == '__main__':
     executor.start_polling(dp)
