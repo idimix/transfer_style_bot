@@ -55,8 +55,8 @@ def transfer_style_send_photo(model_name, file_content, file_style, file_output,
     else:
         print('Error! Model name wrong')
 
-    if os.path.exists(file_content):
-        with open(file_content, 'rb') as photo:
+    if os.path.exists(file_output):
+        with open(file_output, 'rb') as photo:
             send_photo(chat_id, photo)
 
     send_message(chat_id, 'Try again? Send the command /style_transfer')
